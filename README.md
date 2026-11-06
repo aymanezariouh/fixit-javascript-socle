@@ -7,8 +7,8 @@ A small Vite app for tracking fictional device repairs.
 In PowerShell, run:
 
 ```powershell
-npm.cmd install
-npm.cmd run dev
+npm install
+npm run dev
 ```
 
 Open the local URL printed by Vite (usually `http://localhost:5173/`).
