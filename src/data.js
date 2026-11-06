@@ -4,3 +4,4 @@ const initialRepairs = [
   { id: "R3", device: "Imprimante", status: "en_cours" },
   { id: "R4", device: "Tablette", status: "termine" },
 ];
+export default initialRepairs;

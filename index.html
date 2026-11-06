@@ -7,7 +7,21 @@
     <title>fixit-javascript-socle</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <h1>fixit</h1>
+      <form action="./" method="post">
+        <input type="text" id="device" />
+        <button type="submit">+=-+</button>
+      </form>
+      <h2 class="ccounter"></h2>
+      <select name="status" id="status">
+        <option value="tous">tous</option>
+        <option value="en_cours">en_cours</option>
+        <option value="recu">recu</option>
+        <option value="termine">termine</option>
+      </select>
+      <div class="repairList"></div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

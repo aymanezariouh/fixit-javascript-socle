@@ -1,60 +1,91 @@
-import './style.css'
-import heroImg from './assets/hero.png'
-import javascriptLogo from './assets/javascript.svg'
-import viteLogo from './assets/vite.svg'
-import { setupCounter } from './counter.js'
+import "./style.css";
+import heroImg from "./assets/hero.png";
+import javascriptLogo from "./assets/javascript.svg";
+import viteLogo from "./assets/vite.svg";
+import { setupCounter } from "./counter.js";
+import initialRepairs from "./data.js";
 
-document.querySelector('#app').innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${javascriptLogo}" class="framework" alt="JavaScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.js</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+function loadRepairs(initialRepairs) {
+  const savedText = localStorage.getItem("fixit-repairs");
+  if (savedText === null) return initialRepairs;
+  return JSON.parse(savedText);
+}
 
-<div class="ticks"></div>
+function saveRepairs(repairs) {
+  localStorage.setItem("fixit-repairs", JSON.stringify(repairs));
+}
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-          <img class="button-icon" src="${javascriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+let repairesTemp = loadRepairs(initialRepairs);
+const deviceInput = document.querySelector("#device");
+const repaireContainer = document.querySelector(".repairList");
+const selector = document.querySelector("#status");
+const counter = document.querySelector(".ccounter");
+///=================functions==================
+function renderRepairs(visibleRepairs) {
+  repaireContainer.innerHTML = "";
+  visibleRepairs.forEach((repaire) => {
+    const p = document.createElement("p");
+    const btn = document.createElement("button");
+    p.textContent = `${repaire.device} ,${repaire.status} `;
+    repaireContainer.appendChild(p);
+    btn.textContent = "terminer";
+    btn.addEventListener("click", () => {
+      repairesTemp = changeStatus(repairesTemp, repaire.id);
+      saveRepairs(repairesTemp);
+      renderRepairs(filterRepairs(repairesTemp, selector.value));
+    });
+    repaireContainer.appendChild(btn);
+  });
+  if (visibleRepairs.length.length === 0) {
+    repaireContainer.textContent = "Aucune réparation";
+  }
+  counter.textContent = visibleRepairs.length;
+}
+renderRepairs(repairesTemp);
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+function filterRepairs(visibleRepairs, status) {
+  if (status === "tous") {
+    return visibleRepairs;
+  }
+  return visibleRepairs.filter((item) => item.status === status);
+}
+function addRepair(repairs, deviceN) {
+  if (!deviceN.trim()) return;
+  const id = crypto.randomUUID();
+  const device = deviceN.trim();
+  const newA = {
+    id,
+    device,
+    status: "recu",
+  };
+  return [...repairs, newA];
+}
+function changeStatus(repairs, id) {
+  return repairs.map((repair) => {
+    if (repair.id === id) {
+      return {
+        id: repair.id,
+        device: repair.device,
+        status: "termine",
+      };
+    }
 
-setupCounter(document.querySelector('#counter'))
+    return repair;
+  });
+}
+changeStatus(repairesTemp, "R2");
+
+///=============event listeners ==================
+
+selector.addEventListener("change", () => {
+  const results = filterRepairs(repairesTemp, selector.value);
+  renderRepairs(results);
+});
+document.querySelector("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!deviceInput.value.trim()) return;
+  repairesTemp = addRepair(repairesTemp, deviceInput.value);
+  saveRepairs(repairesTemp);
+  renderRepairs(filterRepairs(repairesTemp, selector.value));
+  deviceInput.value = "";
+});
